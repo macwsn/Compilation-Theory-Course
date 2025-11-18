@@ -1,2 +1,2 @@
 # Compilation Theory
-Compilation Theory from AGH UST 2025
+Compilation Theory course from AGH UST 2025(ongoing)
