@@ -1,5 +1,5 @@
 from sly import Parser
-from lab1.scanner import Scanner
+from scanner import Scanner
 
 class Mparser(Parser):
 
@@ -7,7 +7,7 @@ class Mparser(Parser):
 
     start = 'program'
     
-    debugfile = 'parser.out'
+    debugfile = 'parser2.out'
 
     precedence = (
         ('nonassoc', 'IFX'),
