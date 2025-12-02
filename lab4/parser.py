@@ -8,7 +8,7 @@ class Mparser(Parser):
 
     start = 'program'
     
-    debugfile = 'parser.out'
+    debugfile = 'parser_new.out'
     expected_shift_reduce = 1
 
     precedence = (
@@ -63,12 +63,12 @@ class Mparser(Parser):
     def instruction(self, p):
         return AST.While(p.condition, p.instruction, lineno=p.lineno)
 
-    @_('FOR ID "=" range instruction')
+    @_('FOR ID "=" range_expr instruction')
     def instruction(self, p):
-        return AST.For(AST.Variable(p.ID, lineno=p.lineno), p.range, p.instruction, lineno=p.lineno)
+        return AST.For(AST.Variable(p.ID, lineno=p.lineno), p.range_expr, p.instruction, lineno=p.lineno)
     
     @_('expression ":" expression')
-    def range(self, p):
+    def range_expr(self, p):
         return AST.Range(p.expression0, p.expression1, lineno=p.lineno)
 
     @_('ID "=" expression ";"')

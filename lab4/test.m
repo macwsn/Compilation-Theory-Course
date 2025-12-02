@@ -39,7 +39,7 @@ P = M .* N;
 
 # OK: Break inside loop with nested if
 for i = 1:10 {
-    if i == 5 {
+    if (i == 5) {
         break;
     }
 }
