@@ -1,26 +1,38 @@
-
 import sys
-import ply.yacc as yacc
-from Mparser import Mparser
+from scanner import Scanner
+from parser import Mparser
 from TreePrinter import TreePrinter
 from TypeChecker import TypeChecker
 
 if __name__ == '__main__':
 
     try:
-        filename = sys.argv[1] if len(sys.argv) > 1 else "example.txt"
+        filename = sys.argv[1] if len(sys.argv) > 1 else "test.m"
         file = open(filename, "r")
     except IOError:
         print("Cannot open {0} file".format(filename))
         sys.exit(0)
 
-    Mparser = Mparser()
-    parser = yacc.yacc(module=Mparser)
     text = file.read()
+    file.close()
 
-    ast = parser.parse(text, lexer=Mparser.scanner)
-
-    # Below code shows how to use visitor
-    typeChecker = TypeChecker()   
-    typeChecker.visit(ast)   # or alternatively ast.accept(typeChecker)
+    # Lexical analysis
+    scanner = Scanner()
     
+    # Syntactic analysis
+    parser = Mparser()
+    ast = parser.parse(scanner.tokenize(text))
+
+    if ast is None:
+        print("Parsing failed")
+        sys.exit(1)
+
+    # Semantic analysis
+    print("\n=== Semantic Analysis ===\n")
+    typeChecker = TypeChecker()   
+    typeChecker.visit(ast)
+    
+    if typeChecker.errors:
+        print(f"\nFound {len(typeChecker.errors)} semantic error(s)")
+    else:
+        print("\nNo semantic errors found")
