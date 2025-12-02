@@ -16,10 +16,7 @@ if __name__ == '__main__':
     text = file.read()
     file.close()
 
-    # Lexical analysis
     scanner = Scanner()
-    
-    # Syntactic analysis
     parser = Mparser()
     ast = parser.parse(scanner.tokenize(text))
 
@@ -27,7 +24,6 @@ if __name__ == '__main__':
         print("Parsing failed")
         sys.exit(1)
 
-    # Semantic analysis
     print("\n=== Semantic Analysis ===\n")
     typeChecker = TypeChecker()   
     typeChecker.visit(ast)
