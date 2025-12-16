@@ -1,7 +1,7 @@
 # Simple test file
 
 # ERROR: Matrix rows with different sizes
-A = [[1, 2, 3], [4, 5]];
+A = [ [4, 5],[1, 2, 3]];
 
 # ERROR: Out of bounds access
 B = [[1, 2], [3, 4]];
@@ -18,11 +18,6 @@ C = B + 5;
 
 # ERROR: Invalid matrix function parameter
 E = eye(0);
-
-# ERROR: Incompatible matrix multiplication
-M1 = [[1, 2], [3, 4]];
-M2 = [[1, 2, 3], [4, 5, 6]];
-M3 = M1 * M2;
 
 # OK: Valid operations
 H = eye(3);
@@ -66,5 +61,11 @@ bad = zeros(-5);
 
 # ERROR: Rectangular matrix multiplication
 R1 = zeros(2, 3);
-R2 = zeros(4, 2);
+R2 = zeros(3,9);
 R3 = R1 * R2;
+
+Z = [[2,23,1],[2,3,4,5]];
+Z1 = [[1,3,4,2],[2,3,4,5]];
+Z2 = Z1 * Z;
+
+x=0;
