@@ -1,6 +1,10 @@
 class Node:
+    def __init__(self):
+        self.lineno = 0
     def __str__(self):
         return self.printTree()
+    def accept(self, visitor):
+        return visitor.visit(self)
 
 
 class Program(Node):

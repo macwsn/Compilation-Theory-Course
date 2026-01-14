@@ -10,7 +10,6 @@ class NodeVisitor(object):
         return visitor(node)
 
     def generic_visit(self, node):
-        # Domyślna implementacja - nie robi nic
         pass
 
 class TypeChecker(NodeVisitor):
@@ -19,7 +18,6 @@ class TypeChecker(NodeVisitor):
         self.loop_depth = 0
         self.errors = []
         
-        # Type compatibility table for binary operations
         self.ttype = {
             # Arithmetic operations: +, -, *, /
             '+': {
@@ -108,7 +106,6 @@ class TypeChecker(NodeVisitor):
         left_type, left_shape = left_info
         right_type, right_shape = right_info
         
-        # Check if operation is defined for these types
         if op in self.ttype:
             key = (left_type, right_type)
             if key not in self.ttype[op]:
@@ -116,8 +113,7 @@ class TypeChecker(NodeVisitor):
                 return None
             
             result_type, constraint = self.ttype[op][key]
-            
-            # Check size constraints
+
             if constraint == 'same_size':
                 if left_shape != right_shape:
                     self.error(f"Incompatible shapes for {op}: {left_shape} and {right_shape}", node.lineno)
@@ -149,27 +145,24 @@ class TypeChecker(NodeVisitor):
         left_type, left_shape = left_info
         right_type, right_shape = right_info
         
-        # Relational operators work on scalars
         if left_type not in ['int', 'float'] or right_type not in ['int', 'float']:
             self.error(f"Relational operator {node.op} requires scalar operands", node.lineno)
         
         return ('int', None)
 
     def visit_Assignment(self, node):
-        # First evaluate the right side
         right_info = self.visit(node.right)
         
         if right_info is None:
             return None
         
         right_type, right_shape = right_info
-        
-        # Handle variable assignment
+
         if isinstance(node.left, AST.Variable):
             var_name = node.left.name
             
             if node.op == '=':
-                # Simple assignment - define the variable
+
                 symbol = VariableSymbol(var_name, right_type, right_shape)
                 self.symbol_table.put(var_name, symbol)
             else:
@@ -178,21 +171,17 @@ class TypeChecker(NodeVisitor):
                 if symbol is None:
                     self.error(f"Variable '{var_name}' not defined", node.lineno)
                 else:
-                    # Check type compatibility
                     op_base = node.op[0]  # Get '+', '-', '*', '/'
                     left_type, left_shape = symbol.type, symbol.shape
-                    
-                    # Simulate binary operation
+
                     if op_base in self.ttype:
                         key = (left_type, right_type)
                         if key not in self.ttype[op_base]:
                             self.error(f"Invalid compound assignment {node.op}: {left_type} and {right_type}", node.lineno)
                         elif left_type in ['vector', 'matrix'] and left_shape != right_shape:
                             self.error(f"Incompatible shapes for {node.op}: {left_shape} and {right_shape}", node.lineno)
-        
-        # Handle matrix/vector element assignment
+
         elif isinstance(node.left, (AST.MatrixElement, AST.VectorElement)):
-            # Evaluate left side to check bounds
             self.visit(node.left)
         
         return right_info
@@ -211,8 +200,7 @@ class TypeChecker(NodeVisitor):
 
     def visit_For(self, node):
         range_info = self.visit(node.range)
-        
-        # Register loop variable as int
+
         if isinstance(node.var, AST.Variable):
             symbol = VariableSymbol(node.var.name, 'int', None)
             self.symbol_table.put(node.var.name, symbol)
@@ -286,7 +274,6 @@ class TypeChecker(NodeVisitor):
                 if index < 0 or index >= rows:
                     self.error(f"Row index {index} out of bounds for matrix with {rows} rows", node.lineno)
         
-        # Vector element returns scalar, matrix row returns vector
         if symbol.type == 'vector':
             return ('float', None)
         else:  # matrix
@@ -319,8 +306,7 @@ class TypeChecker(NodeVisitor):
     def visit_Matrix(self, node):
         if not node.rows:
             return ('matrix', (0, 0))
-        
-        # Check that all rows are vectors and have the same size
+
         row_sizes = []
         for i, row in enumerate(node.rows):
             if not isinstance(row, AST.Vector):
@@ -332,8 +318,7 @@ class TypeChecker(NodeVisitor):
                 row_sizes.append(row_info[1][0])
             else:
                 row_sizes.append(len(row.elements))
-        
-        # Check that all rows have the same size
+
         if row_sizes and len(set(row_sizes)) > 1:
             self.error(f"Matrix rows have different sizes: {set(row_sizes)}", node.lineno)
             return ('matrix', None)
@@ -346,26 +331,21 @@ class TypeChecker(NodeVisitor):
         if not node.elements:
             return ('vector', (0,))
         
-        # Visit all elements
         for elem in node.elements:
             self.visit(elem)
         
         return ('vector', (len(node.elements),))
 
     def visit_MatrixFunction(self, node):
-        # node.size can be an integer or tuple of integers
         size_value = node.size
-        
-        # Handle both single parameter and two parameters
+
         if isinstance(size_value, tuple):
             rows, cols = size_value
-            # Check that both dimensions are positive
             if rows <= 0 or cols <= 0:
                 self.error(f"Matrix function '{node.name}' requires positive dimensions, got ({rows}, {cols})", node.lineno)
                 return None
             return ('matrix', (rows, cols))
         else:
-            # Single parameter - square matrix
             if size_value <= 0:
                 self.error(f"Matrix function '{node.name}' requires positive size, got {size_value}", node.lineno)
                 return None
@@ -392,8 +372,7 @@ class TypeChecker(NodeVisitor):
         if expr_type != 'matrix':
             self.error(f"Transpose only applicable to matrices, not {expr_type}", node.lineno)
             return None
-        
-        # Transpose swaps dimensions
+
         if expr_shape and len(expr_shape) == 2:
             return ('matrix', (expr_shape[1], expr_shape[0]))
         return ('matrix', None)
