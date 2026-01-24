@@ -10,7 +10,6 @@ class NodeVisitor(object):
         return visitor(node)
 
     def generic_visit(self, node):
-        # Domyślna implementacja - nie robi nic
         pass
 
 class TypeChecker(NodeVisitor):
@@ -44,6 +43,8 @@ class TypeChecker(NodeVisitor):
                 ('float', 'int'): ('float', None),
                 ('float', 'float'): ('float', None),
                 ('matrix', 'matrix'): ('matrix', 'matrix_mul'),
+                ('string', 'int'): ('string', None),
+                ('int', 'string'): ('string', None),
             },
             '/': {
                 ('int', 'int'): ('int', None),
@@ -369,7 +370,7 @@ class TypeChecker(NodeVisitor):
             if size_value <= 0:
                 self.error(f"Matrix function '{node.name}' requires positive size, got {size_value}", node.lineno)
                 return None
-            return ('matrix', (size_value, size_value))
+            return 'matrix', (size_value, size_value)
 
     def visit_UnaryMinus(self, node):
         expr_info = self.visit(node.expr)
@@ -395,5 +396,5 @@ class TypeChecker(NodeVisitor):
         
         # Transpose swaps dimensions
         if expr_shape and len(expr_shape) == 2:
-            return ('matrix', (expr_shape[1], expr_shape[0]))
-        return ('matrix', None)
+            return 'matrix', (expr_shape[1], expr_shape[0])
+        return 'matrix', None
