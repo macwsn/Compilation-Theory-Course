@@ -262,6 +262,10 @@ class Mparser(Parser):
     @_('FLOATNUM')
     def elem(self, p):
         return AST.FloatNum(p.FLOATNUM, lineno=p.lineno)
+
+    @_('STRING')
+    def expression(self, p):
+        return AST.String(p.STRING, lineno=p.lineno)
     
     @_('ID')
     def elem(self, p):
